@@ -1,8 +1,36 @@
 const express = require('express');
+const { MongoClient } = require('mongodb');
+
 const app = express();
 const port = process.env.PORT || 3001;
 
+const uri =
+	'mongodb+srv://pranjaljain0:Cu006bzbMitUTbcM@cluster0.gylbe.mongodb.net/Hirect?retryWrites=true&w=majority';
+
 app.get('/', (req, res) => res.type('html').send(html));
+app.get('/hello', (req, res) => res.json({ Hello: 'Workin' }));
+app.get('/getAllJobs', async (req, res) => {
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Jobs')
+				.find({})
+				.toArray((err, results) => {
+					err && res.status(400).json(err);
+					res.status(200).json(results);
+				});
+			return client;
+		})
+		// .then((client) => client.close())
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.log(error);
+		});
+});
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
