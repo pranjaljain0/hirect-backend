@@ -41,7 +41,7 @@ app.get('/auth/login', (req, res) => {
 		});
 });
 
-app.post('/auth/JonSeekerSignUp', (req, res) => {
+app.post('/auth/JobSeekerSignUp', (req, res) => {
 	var email = req.body.email;
 	var password = req.body.password;
 	var fullName = req.body.fullName;
@@ -74,7 +74,9 @@ app.post('/auth/JonSeekerSignUp', (req, res) => {
 								appliedJobs: [],
 							})
 							.then((e) => {
-								res.status(200).json({ status: 1, message: 'User Registered' });
+								res
+									.status(200)
+									.json({ status: 1, message: 'User Registered', res: e });
 							});
 					}
 				});
@@ -87,7 +89,7 @@ app.post('/auth/JonSeekerSignUp', (req, res) => {
 		});
 });
 
-app.post('/auth/JonProviderSignUp', (req, res) => {
+app.post('/auth/JobProviderSignUp', (req, res) => {
 	var email = req.body.email;
 	var password = req.body.password;
 	var fullName = req.body.fullName;
@@ -118,8 +120,7 @@ app.post('/auth/JonProviderSignUp', (req, res) => {
 								jobPosts: [],
 							})
 							.then((e) => {
-								console.log(e);
-								res.json({ status: 1, message: 'User Registered' });
+								res.json({ status: 1, message: 'User Registered', res: e });
 							});
 					}
 				});
