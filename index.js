@@ -46,6 +46,18 @@ app.post('/auth/JobSeekerSignUp', (req, res) => {
 	var password = req.body.password;
 	var fullName = req.body.fullName;
 
+	var data = {
+		accountType: 1,
+		email,
+		password,
+		fullName,
+		education: [],
+		experience: [],
+		certifications: [],
+		savedJobs: [],
+		appliedJobs: [],
+	};
+
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
@@ -62,21 +74,13 @@ app.post('/auth/JobSeekerSignUp', (req, res) => {
 						client
 							.db('Hirect')
 							.collection('Users')
-							.insertOne({
-								accountType: 1,
-								email,
-								password,
-								fullName,
-								education: [],
-								experience: [],
-								certifications: [],
-								savedJobs: [],
-								appliedJobs: [],
-							})
+							.insertOne(data)
 							.then((e) => {
-								res
-									.status(200)
-									.json({ status: 1, message: 'User Registered', res: e });
+								res.status(200).json({
+									status: 1,
+									message: 'User Registered',
+									res: { ...e, ...data },
+								});
 							});
 					}
 				});
@@ -94,6 +98,14 @@ app.post('/auth/JobProviderSignUp', (req, res) => {
 	var password = req.body.password;
 	var fullName = req.body.fullName;
 	var companyName = req.body.companyName;
+	var data = {
+		accountType: 0,
+		email,
+		password,
+		fullName,
+		companyName,
+		jobPosts: [],
+	};
 
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
@@ -111,16 +123,13 @@ app.post('/auth/JobProviderSignUp', (req, res) => {
 						client
 							.db('Hirect')
 							.collection('Users')
-							.insertOne({
-								accountType: 0,
-								email,
-								password,
-								fullName,
-								companyName,
-								jobPosts: [],
-							})
+							.insertOne(data)
 							.then((e) => {
-								res.json({ status: 1, message: 'User Registered', res: e });
+								res.json({
+									status: 1,
+									message: 'User Registered',
+									res: { ...e, ...data },
+								});
 							});
 					}
 				});
