@@ -45,7 +45,7 @@ app.post('/auth/JobSeekerSignUp', (req, res) => {
 	var email = req.body.email;
 	var password = req.body.password;
 	var fullName = req.body.fullName;
-
+	console.log({ email, password, fullName });
 	var data = {
 		accountType: 1,
 		email,
@@ -57,6 +57,7 @@ app.post('/auth/JobSeekerSignUp', (req, res) => {
 		savedJobs: [],
 		appliedJobs: [],
 	};
+	console.log(data);
 
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
