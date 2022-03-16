@@ -29,7 +29,9 @@ app.get('/auth/login', (req, res) => {
 				.find({ email: email, password: password })
 				.toArray((err, results) => {
 					err && res.status(400).json({ error: err, status: 0 });
-					res.status(200).json(results);
+					if (results.length != 1)
+						res.status(401).json({ status: 0, message: 'User not found' });
+					else res.status(200).json(results);
 				});
 			return client;
 		})
@@ -55,7 +57,7 @@ app.post('/auth/JonSeekerSignUp', (req, res) => {
 				.find({ email: email })
 				.toArray((err, results) => {
 					if (results.length === 1) {
-						res.json({ status: 0, message: 'Email already found' });
+						res.status(100).json({ status: 0, message: 'Email already found' });
 					} else {
 						client
 							.db('Hirect')
@@ -68,10 +70,11 @@ app.post('/auth/JonSeekerSignUp', (req, res) => {
 								education: [],
 								experience: [],
 								certifications: [],
+								savedJobs: [],
+								appliedJobs: [],
 							})
 							.then((e) => {
-								console.log(e);
-								res.json({ status: 1, message: 'User Registered' });
+								res.status(200).json({ status: 1, message: 'User Registered' });
 							});
 					}
 				});
