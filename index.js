@@ -1,5 +1,6 @@
 const express = require('express');
 const { MongoClient } = require('mongodb');
+const bodyParser = require('body-parser');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -7,8 +8,127 @@ const port = process.env.PORT || 3001;
 const uri =
 	'mongodb+srv://pranjaljain0:Cu006bzbMitUTbcM@cluster0.gylbe.mongodb.net/Hirect?retryWrites=true&w=majority';
 
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 app.get('/', (req, res) => res.type('html').send(html));
 app.get('/hello', (req, res) => res.json({ Hello: 'Workin' }));
+
+app.get('/auth/login', (req, res) => {
+	let email = req.query.email;
+	let password = req.query.password;
+
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Users')
+				.find({ email: email, password: password })
+				.toArray((err, results) => {
+					err && res.status(400).json({ error: err, status: 0 });
+					res.status(200).json(results);
+				});
+			return client;
+		})
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.log(error);
+		});
+});
+
+app.post('/auth/JonSeekerSignUp', (req, res) => {
+	var email = req.body.email;
+	var password = req.body.password;
+	var fullName = req.body.fullName;
+
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Users')
+				.find({ email: email })
+				.toArray((err, results) => {
+					if (results.length === 1) {
+						res.json({ status: 0, message: 'Email already found' });
+					} else {
+						client
+							.db('Hirect')
+							.collection('Users')
+							.insertOne({
+								accountType: 1,
+								email,
+								password,
+								fullName,
+								education: [],
+								experience: [],
+								certifications: [],
+							})
+							.then((e) => {
+								console.log(e);
+								res.json({ status: 1, message: 'User Registered' });
+							});
+					}
+				});
+
+			return client;
+		})
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.log(error);
+		});
+});
+
+app.post('/auth/JonProviderSignUp', (req, res) => {
+	var email = req.body.email;
+	var password = req.body.password;
+	var fullName = req.body.fullName;
+	var companyName = req.body.companyName;
+
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Users')
+				.find({ email: email })
+				.toArray((err, results) => {
+					if (results.length === 1) {
+						res.json({ status: 0, message: 'Email already found' });
+					} else {
+						client
+							.db('Hirect')
+							.collection('Users')
+							.insertOne({
+								accountType: 0,
+								email,
+								password,
+								fullName,
+								companyName,
+								jobPosts: [],
+							})
+							.then((e) => {
+								console.log(e);
+								res.json({ status: 1, message: 'User Registered' });
+							});
+					}
+				});
+
+			return client;
+		})
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.log(error);
+		});
+});
+
 app.get('/getAllJobs', async (req, res) => {
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
@@ -31,6 +151,8 @@ app.get('/getAllJobs', async (req, res) => {
 			console.log(error);
 		});
 });
+
+app.post('/saveJob', (req, res) => res.json({ Hello: 'Workin' }));
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
