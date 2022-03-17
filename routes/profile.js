@@ -6,6 +6,9 @@ const bodyParser = require('body-parser');
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+const uri =
+	'mongodb+srv://pranjaljain0:Cu006bzbMitUTbcM@cluster0.gylbe.mongodb.net/Hirect?retryWrites=true&w=majority';
+
 app.get('/', (req, res) => res.json({ Route: 'Profile' }));
 
 app.get('/get/id', (req, res) => {

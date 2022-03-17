@@ -6,6 +6,9 @@ const app = express.Router();
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
+const uri =
+	'mongodb+srv://pranjaljain0:Cu006bzbMitUTbcM@cluster0.gylbe.mongodb.net/Hirect?retryWrites=true&w=majority';
+
 app.get('/', (req, res) => res.json({ Route: 'Auth' }));
 
 app.get('/login', (req, res) => {
