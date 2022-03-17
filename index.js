@@ -14,6 +14,7 @@ app.use(bodyParser.json());
 
 app.get('/', (req, res) => res.type('html').send(html));
 app.get('/hello', (req, res) => res.json({ Hello: 'Workin' }));
+app.get('/test', (req, res) => res.json({ Route: 'test' }));
 
 app.use('/profile', profileRoutes);
 app.use('/auth', authRoutes);
