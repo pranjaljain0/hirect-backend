@@ -1,29 +1,24 @@
 const express = require('express');
-const { MongoClient } = require('mongodb');
 const bodyParser = require('body-parser');
 
-var authRoutes = require('./auth');
-var profileRoutes = require('./profile');
-var jobsRoutes = require('./jobs');
+var authRoutes = require('./routes/auth');
+var profileRoutes = require('./routes/profile');
+var jobsRoutes = require('./routes/jobs');
+var helperRoutes = require('./routes/helper');
 
 const app = express();
 const port = process.env.PORT || 3001;
-
-const uri =
-	'mongodb+srv://pranjaljain0:Cu006bzbMitUTbcM@cluster0.gylbe.mongodb.net/Hirect?retryWrites=true&w=majority';
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.get('/', (req, res) => res.type('html').send(html));
 app.get('/hello', (req, res) => res.json({ Hello: 'Workin' }));
+
 app.use('/profile', profileRoutes);
 app.use('/auth', authRoutes);
 app.use('/jobs', jobsRoutes);
-
-app.get('/jsonstr', (req, res) => res.json({ str: { fullName: 'PJB' } }));
-
-app.post('/saveJob', (req, res) => res.json({ Hello: 'Workin' }));
+app.use('/helper', helperRoutes);
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
