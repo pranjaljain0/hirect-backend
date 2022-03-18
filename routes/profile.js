@@ -58,6 +58,9 @@ app.get('/get/email', (req, res) => {
 });
 
 app.post('/add/appliedJobs/', (req, res) => {
+	const email = req.body.email;
+	const jobDetail = req.body.jobDetail;
+
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
@@ -66,11 +69,16 @@ app.post('/add/appliedJobs/', (req, res) => {
 			client
 				.db('Hirect')
 				.collection('Users')
-				.find({ email: req.query.email })
-				.toArray((err, results) => {
-					err && res.status(400).json(err);
-					res.status(200).json(results[0].appliedJobs);
-				});
+				.updateOne(
+					{ email: email },
+					{
+						$push: {
+							appliedJobs: [jobDetail],
+						},
+					}
+				)
+				.then((e) => res.status(200).json({ status: 1, message: 'Added' }));
+
 			return client;
 		})
 		.catch((error) => {
@@ -80,6 +88,9 @@ app.post('/add/appliedJobs/', (req, res) => {
 });
 
 app.post('/add/savedJobs/', (req, res) => {
+	const email = req.body.email;
+	const jobDetail = req.body.jobDetail;
+
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
@@ -88,11 +99,16 @@ app.post('/add/savedJobs/', (req, res) => {
 			client
 				.db('Hirect')
 				.collection('Users')
-				.find({ email: req.query.email })
-				.toArray((err, results) => {
-					err && res.status(400).json(err);
-					res.status(200).json(results[0].appliedJobs);
-				});
+				.updateOne(
+					{ email: email },
+					{
+						$push: {
+							savedJobs: [jobDetail],
+						},
+					}
+				)
+				.then((e) => res.status(200).json({ status: 1, message: 'Added' }));
+
 			return client;
 		})
 		.catch((error) => {
@@ -101,7 +117,7 @@ app.post('/add/savedJobs/', (req, res) => {
 		});
 });
 
-app.get('/get/appliedJobs/', (req, res) => {
+app.get('/get/appliedJobs', (req, res) => {
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
