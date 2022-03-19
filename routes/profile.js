@@ -57,9 +57,10 @@ app.get('/get/email', (req, res) => {
 		});
 });
 
-app.post('/add/appliedJobs/', (req, res) => {
+app.post('/add/appliedJobs', (req, res) => {
 	const email = req.body.email;
-	const jobDetail = req.body.jobDetail;
+	const _jobDetail = req.body.jobDetail;
+	const _userDetails = req.body.userDetails;
 
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
@@ -70,14 +71,30 @@ app.post('/add/appliedJobs/', (req, res) => {
 				.db('Hirect')
 				.collection('Users')
 				.updateOne(
-					{ email: email },
+					{ email: _jobDetail.jobPostOwnerEmail },
 					{
-						$push: {
-							appliedJobs: [jobDetail],
+						$addToSet: {
+							applications: { ..._userDetails, jobTitle: _jobDetail.jobTitle },
 						},
 					}
 				)
-				.then((e) => res.status(200).json({ status: 1, message: 'Added' }));
+				.then((e) => console.log(e));
+
+			client
+				.db('Hirect')
+				.collection('Users')
+				.updateOne(
+					{ email: email },
+					{
+						$addToSet: {
+							appliedJobs: _jobDetail,
+						},
+					}
+				)
+				.then((e) => {
+					console.log(e);
+					res.status(200).json({ status: 1, message: 'Added' });
+				});
 
 			return client;
 		})
@@ -102,8 +119,8 @@ app.post('/add/savedJobs/', (req, res) => {
 				.updateOne(
 					{ email: email },
 					{
-						$push: {
-							savedJobs: [jobDetail],
+						$addToSet: {
+							savedJobs: jobDetail,
 						},
 					}
 				)
@@ -139,6 +156,28 @@ app.get('/get/appliedJobs', (req, res) => {
 		});
 });
 
+app.get('/get/applications', (req, res) => {
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Users')
+				.find({ email: req.query.email })
+				.toArray((err, results) => {
+					err && res.status(400).json(err);
+					res.status(200).json(results[0].applications);
+				});
+			return client;
+		})
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.log(error);
+		});
+});
+
 app.get('/get/savedJobs/', (req, res) => {
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
@@ -164,6 +203,7 @@ app.get('/get/savedJobs/', (req, res) => {
 app.post('/update', (req, res) => {
 	var email = req.body.email;
 	var updatedDoc = req.body.updatedDoc;
+	console.log({ email, updatedDoc });
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,

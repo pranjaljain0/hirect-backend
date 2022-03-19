@@ -101,6 +101,7 @@ app.post('/JobProviderSignUp', (req, res) => {
 		fullName,
 		companyName,
 		jobPosts: [],
+		applications: [],
 	};
 
 	MongoClient.connect(uri, {
