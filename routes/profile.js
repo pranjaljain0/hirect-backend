@@ -2,14 +2,67 @@ var express = require('express');
 const app = express.Router();
 const { MongoClient } = require('mongodb');
 const bodyParser = require('body-parser');
+const { AffindaCredential, AffindaAPI } = require('@affinda/affinda');
+const fs = require('fs');
+const morgan = require('morgan');
+const _ = require('lodash');
+const fileUpload = require('express-fileupload');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(morgan('dev'));
+app.use(
+	fileUpload({
+		createParentPath: true,
+	})
+);
 
 const uri =
 	'mongodb+srv://pranjaljain0:Cu006bzbMitUTbcM@cluster0.gylbe.mongodb.net/Hirect?retryWrites=true&w=majority';
 
 app.get('/', (req, res) => res.json({ Route: 'Profile' }));
+
+app.post('/resumeParser', async (req, res) => {
+	try {
+		if (!req.files)
+			res.json({
+				status: false,
+				message: 'No file uploaded',
+			});
+		else {
+			let resume = req.files.resume;
+			resume.mv('./uploads/' + resume.name);
+
+			const credential = new AffindaCredential(
+				'e01c296c8855ce16c59799532efff7c11ce9bd4d'
+			);
+			const client = new AffindaAPI(credential);
+			const readStream = fs.createReadStream('./uploads/' + resume.name);
+
+			client
+				.createResume({ file: readStream })
+				.then((result) => {
+					res.json({
+						status: true,
+						message: 'File is uploaded',
+						data: {
+							name: resume.name,
+							mimetype: resume.mimetype,
+							size: resume.size,
+						},
+						resume: result,
+					});
+				})
+				.catch((err) => {
+					res.status(500).send(err);
+				});
+
+			// Can also use a URL:
+		}
+	} catch (err) {
+		res.status(500).send(err);
+	}
+});
 
 app.get('/get/id', (req, res) => {
 	console.log(req.query._id);

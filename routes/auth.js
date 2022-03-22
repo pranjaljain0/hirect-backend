@@ -2,9 +2,11 @@ var express = require('express');
 const { MongoClient } = require('mongodb');
 const bodyParser = require('body-parser');
 const app = express.Router();
+const morgan = require('morgan');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(morgan('dev'));
 
 const uri =
 	'mongodb+srv://pranjaljain0:Cu006bzbMitUTbcM@cluster0.gylbe.mongodb.net/Hirect?retryWrites=true&w=majority';

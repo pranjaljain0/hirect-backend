@@ -3,9 +3,11 @@ const bodyParser = require('body-parser');
 const express = require('express');
 const { json } = require('express/lib/response');
 const app = express.Router();
+const morgan = require('morgan');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(morgan('dev'));
 
 const uri =
 	'mongodb+srv://pranjaljain0:Cu006bzbMitUTbcM@cluster0.gylbe.mongodb.net/Hirect?retryWrites=true&w=majority';
