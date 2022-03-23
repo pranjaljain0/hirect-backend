@@ -22,6 +22,97 @@ const uri =
 
 app.get('/', (req, res) => res.json({ Route: 'Profile' }));
 
+app.get('/votecount', async (req, res) => {
+	var email = req.query.email;
+
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Users')
+				.findOne({ email })
+				.then((e) => {
+					res.status(200).json({ status: 'SUCCESS' });
+				});
+
+			return client;
+		})
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.error(error);
+		});
+});
+
+app.post('/rate/up', async (req, res) => {
+	var email = req.body.email;
+	var upvote = req.body.upvote;
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Users')
+				.updateOne(
+					{ email },
+					{
+						$set: {
+							upvote: upvote + 1,
+						},
+					}
+				)
+				.then((e) =>
+					res.status(200).json({ status: 'SUCCESS', voteCount: upvote + 1 })
+				);
+
+			return client;
+		})
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.error(error);
+		});
+});
+
+app.post('/rate/down', async (req, res) => {
+	var email = req.body.email;
+	var downvote = req.body.downvote;
+
+	if (downvote - 1 > 0)
+		MongoClient.connect(uri, {
+			useNewUrlParser: true,
+			useUnifiedTopology: true,
+		})
+			.then((client) => {
+				client
+					.db('Hirect')
+					.collection('Users')
+					.updateOne(
+						{ email },
+						{
+							$set: {
+								downvote: downvote - 1,
+							},
+						}
+					)
+					.then((e) =>
+						res.status(200).json({
+							upVote: e.upVote,
+							downVote: e.downVote,
+						})
+					);
+
+				return client;
+			})
+			.catch((error) => {
+				res.status(500).json({ status: 'ERROR', err: error });
+				console.error(error);
+			});
+});
+
 app.post('/resumeParser', async (req, res) => {
 	try {
 		if (!req.files)
@@ -64,8 +155,7 @@ app.post('/resumeParser', async (req, res) => {
 	}
 });
 
-app.get('/get/id', (req, res) => {
-	console.log(req.query._id);
+app.get('/get/id', async (req, res) => {
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
@@ -83,12 +173,11 @@ app.get('/get/id', (req, res) => {
 		})
 		.catch((error) => {
 			res.status(500).json({ status: 'ERROR', err: error });
-			console.log(error);
+			console.error(error);
 		});
 });
 
-app.get('/get/email', (req, res) => {
-	console.log(req.query.email);
+app.get('/get/email', async (req, res) => {
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
@@ -106,11 +195,11 @@ app.get('/get/email', (req, res) => {
 		})
 		.catch((error) => {
 			res.status(500).json({ status: 'ERROR', err: error });
-			console.log(error);
+			console.error(error);
 		});
 });
 
-app.post('/add/appliedJobs', (req, res) => {
+app.post('/add/appliedJobs', async (req, res) => {
 	const email = req.body.email;
 	const _jobDetail = req.body.jobDetail;
 	const _userDetails = req.body.userDetails;
@@ -130,8 +219,7 @@ app.post('/add/appliedJobs', (req, res) => {
 							applications: { ..._userDetails, jobTitle: _jobDetail.jobTitle },
 						},
 					}
-				)
-				.then((e) => console.log(e));
+				);
 
 			client
 				.db('Hirect')
@@ -145,7 +233,6 @@ app.post('/add/appliedJobs', (req, res) => {
 					}
 				)
 				.then((e) => {
-					console.log(e);
 					res.status(200).json({ status: 1, message: 'Added' });
 				});
 
@@ -153,11 +240,11 @@ app.post('/add/appliedJobs', (req, res) => {
 		})
 		.catch((error) => {
 			res.status(500).json({ status: 'ERROR', err: error });
-			console.log(error);
+			console.error(error);
 		});
 });
 
-app.post('/add/savedJobs/', (req, res) => {
+app.post('/add/savedJobs/', async (req, res) => {
 	const email = req.body.email;
 	const jobDetail = req.body.jobDetail;
 
@@ -183,11 +270,11 @@ app.post('/add/savedJobs/', (req, res) => {
 		})
 		.catch((error) => {
 			res.status(500).json({ status: 'ERROR', err: error });
-			console.log(error);
+			console.error(error);
 		});
 });
 
-app.get('/get/appliedJobs', (req, res) => {
+app.get('/get/appliedJobs', async (req, res) => {
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
@@ -205,11 +292,11 @@ app.get('/get/appliedJobs', (req, res) => {
 		})
 		.catch((error) => {
 			res.status(500).json({ status: 'ERROR', err: error });
-			console.log(error);
+			console.error(error);
 		});
 });
 
-app.get('/get/applications', (req, res) => {
+app.get('/get/applications', async (req, res) => {
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
@@ -227,11 +314,11 @@ app.get('/get/applications', (req, res) => {
 		})
 		.catch((error) => {
 			res.status(500).json({ status: 'ERROR', err: error });
-			console.log(error);
+			console.error(error);
 		});
 });
 
-app.get('/get/savedJobs/', (req, res) => {
+app.get('/get/savedJobs/', async (req, res) => {
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
@@ -249,14 +336,13 @@ app.get('/get/savedJobs/', (req, res) => {
 		})
 		.catch((error) => {
 			res.status(500).json({ status: 'ERROR', err: error });
-			console.log(error);
+			console.error(error);
 		});
 });
 
-app.post('/update', (req, res) => {
+app.post('/update', async (req, res) => {
 	var email = req.body.email;
 	var updatedDoc = req.body.updatedDoc;
-	console.log({ email, updatedDoc });
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
@@ -296,7 +382,7 @@ app.post('/update', (req, res) => {
 		// .then((client) => client.close())
 		.catch((error) => {
 			res.status(500).json({ status: 'ERROR', err: error });
-			console.log(error);
+			console.error(error);
 		});
 });
 

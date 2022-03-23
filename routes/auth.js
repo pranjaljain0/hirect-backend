@@ -36,7 +36,7 @@ app.get('/login', (req, res) => {
 		})
 		.catch((error) => {
 			res.status(500).json({ status: 'ERROR', err: error });
-			console.log(error);
+			console.error(error);
 		});
 });
 
@@ -87,7 +87,7 @@ app.post('/JobSeekerSignUp', (req, res) => {
 		})
 		.catch((error) => {
 			res.status(500).json({ status: 'ERROR', err: error });
-			console.log(error);
+			console.error(error);
 		});
 });
 
@@ -102,6 +102,8 @@ app.post('/JobProviderSignUp', (req, res) => {
 		password,
 		fullName,
 		companyName,
+		upVotes: 0,
+		downVotes: 0,
 		jobPosts: [],
 		applications: [],
 	};
@@ -137,7 +139,7 @@ app.post('/JobProviderSignUp', (req, res) => {
 		})
 		.catch((error) => {
 			res.status(500).json({ status: 'ERROR', err: error });
-			console.log(error);
+			console.error(error);
 		});
 });
 
