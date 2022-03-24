@@ -35,7 +35,12 @@ app.get('/votecount', async (req, res) => {
 				.collection('Users')
 				.findOne({ email })
 				.then((e) => {
-					res.status(200).json({ status: 'SUCCESS' });
+					console.log({ upVotes: e.upVotes, downVotes: e.downVotes });
+					res.status(200).json({
+						status: 'SUCCESS',
+						upVotes: e.upVotes,
+						downVotes: e.downVotes,
+					});
 				});
 
 			return client;
@@ -61,7 +66,7 @@ app.post('/rate/up', async (req, res) => {
 					{ email },
 					{
 						$set: {
-							upvote: upvote + 1,
+							upVotes: upvote + 1,
 						},
 					}
 				)
@@ -94,7 +99,7 @@ app.post('/rate/down', async (req, res) => {
 						{ email },
 						{
 							$set: {
-								downvote: downvote - 1,
+								downVotes: downvote - 1,
 							},
 						}
 					)
@@ -113,48 +118,6 @@ app.post('/rate/down', async (req, res) => {
 			});
 });
 
-app.post('/resumeParser', async (req, res) => {
-	try {
-		if (!req.files)
-			res.json({
-				status: false,
-				message: 'No file uploaded',
-			});
-		else {
-			let resume = req.files.resume;
-			resume.mv('./uploads/' + resume.name);
-
-			const credential = new AffindaCredential(
-				'e01c296c8855ce16c59799532efff7c11ce9bd4d'
-			);
-			const client = new AffindaAPI(credential);
-			const readStream = fs.createReadStream('./uploads/' + resume.name);
-
-			client
-				.createResume({ file: readStream })
-				.then((result) => {
-					res.json({
-						status: true,
-						message: 'File is uploaded',
-						data: {
-							name: resume.name,
-							mimetype: resume.mimetype,
-							size: resume.size,
-						},
-						resume: result,
-					});
-				})
-				.catch((err) => {
-					res.status(500).send(err);
-				});
-
-			// Can also use a URL:
-		}
-	} catch (err) {
-		res.status(500).send(err);
-	}
-});
-
 app.get('/get/id', async (req, res) => {
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
@@ -168,6 +131,32 @@ app.get('/get/id', async (req, res) => {
 				.toArray((err, results) => {
 					err && res.status(400).json(err);
 					res.status(200).json(results);
+				});
+			return client;
+		})
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.error(error);
+		});
+});
+
+app.post('/add/:category/:email', async (req, res) => {
+	var { email, category } = req.params;
+	var data = req.body.data;
+	console.log({ email, category });
+	console.log(data);
+
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Users')
+				.updateOne({ email }, { $push: { [category]: data } })
+				.then((e) => {
+					res.status(200).json({ status: 1, message: 'UPDATED' });
 				});
 			return client;
 		})

@@ -143,4 +143,30 @@ app.post('/JobProviderSignUp', (req, res) => {
 		});
 });
 
+app.get('/forget', (req, res) => {
+	let email = req.query.email;
+
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Users')
+				.find({ email: email })
+				.toArray((err, results) => {
+					err && res.status(400).json({ error: err, status: 0 });
+					if (results.length != 1)
+						res.status(401).json({ status: 0, message: 'User not found' });
+					else res.status(200).json({ status: 1, Message: 'Found' });
+				});
+			return client;
+		})
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.error(error);
+		});
+});
+
 module.exports = app;
