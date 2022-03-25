@@ -35,7 +35,6 @@ app.get('/votecount', async (req, res) => {
 				.collection('Users')
 				.findOne({ email })
 				.then((e) => {
-					console.log({ upVotes: e.upVotes, downVotes: e.downVotes });
 					res.status(200).json({
 						status: 'SUCCESS',
 						upVotes: e.upVotes,
@@ -86,36 +85,35 @@ app.post('/rate/down', async (req, res) => {
 	var email = req.body.email;
 	var downvote = req.body.downvote;
 
-	if (downvote - 1 > 0)
-		MongoClient.connect(uri, {
-			useNewUrlParser: true,
-			useUnifiedTopology: true,
-		})
-			.then((client) => {
-				client
-					.db('Hirect')
-					.collection('Users')
-					.updateOne(
-						{ email },
-						{
-							$set: {
-								downVotes: downvote - 1,
-							},
-						}
-					)
-					.then((e) =>
-						res.status(200).json({
-							upVote: e.upVote,
-							downVote: e.downVote,
-						})
-					);
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Users')
+				.updateOne(
+					{ email },
+					{
+						$set: {
+							downVotes: downvote + 1,
+						},
+					}
+				)
+				.then((e) =>
+					res.status(200).json({
+						upVote: e.upVote,
+						downVote: e.downVote,
+					})
+				);
 
-				return client;
-			})
-			.catch((error) => {
-				res.status(500).json({ status: 'ERROR', err: error });
-				console.error(error);
-			});
+			return client;
+		})
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.error(error);
+		});
 });
 
 app.get('/get/id', async (req, res) => {
@@ -143,8 +141,6 @@ app.get('/get/id', async (req, res) => {
 app.post('/add/:category/:email', async (req, res) => {
 	var { email, category } = req.params;
 	var data = req.body.data;
-	console.log({ email, category });
-	console.log(data);
 
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
