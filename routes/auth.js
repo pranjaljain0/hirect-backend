@@ -3,7 +3,10 @@ const { MongoClient } = require('mongodb');
 const bodyParser = require('body-parser');
 const app = express.Router();
 const morgan = require('morgan');
-
+const mailjet = require('node-mailjet').connect(
+	'7b49938b353225cd076dcfa1512d473d',
+	'359b9eda904b7ebce328b3a1830b42a8'
+);
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(morgan('dev'));
@@ -159,7 +162,36 @@ app.get('/forget', (req, res) => {
 					err && res.status(400).json({ error: err, status: 0 });
 					if (results.length != 1)
 						res.status(401).json({ status: 0, message: 'User not found' });
-					else res.status(200).json({ status: 1, Message: 'Found' });
+					else {
+						let password = results[0].password;
+						const request = mailjet.post('send', { version: 'v3.1' }).request({
+							Messages: [
+								{
+									From: {
+										Email: 'rp98@njit.edu',
+										Name: 'Hirect Pilot',
+									},
+									To: [
+										{
+											Email: email,
+										},
+									],
+									Subject: 'Your Hirect password!',
+									TextPart: `Hello, Your password is ${password}`,
+									HTMLPart: `<h3>Hello,!</h3><br /><span>Your password is ${password}</span>`,
+								},
+							],
+						});
+						request
+							.then((result) => {
+								res.status(200).json({ status: 1, Message: 'Found', result });
+							})
+							.catch((err) => {
+								res
+									.status(400)
+									.json({ status: 0, Message: 'Error', error: err });
+							});
+					}
 				});
 			return client;
 		})
