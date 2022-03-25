@@ -328,6 +328,7 @@ app.get('/get/savedJobs/', async (req, res) => {
 app.post('/update', async (req, res) => {
 	var email = req.body.email;
 	var updatedDoc = req.body.updatedDoc;
+	console.log(updatedDoc);
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,
 		useUnifiedTopology: true,

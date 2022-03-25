@@ -25,6 +25,8 @@ app.get('/jsonstr', (req, res) => res.json({ str: { fullName: 'PJB' } }));
 
 app.post('/saveJob', (req, res) => res.json({ Hello: 'Workin' }));
 
+app.post('/saveJob', (req, res) => res.json({ Hello: 'Workin' }));
+
 app.post('/resumeParser', async (req, res) => {
 	try {
 		if (!req.files) {
