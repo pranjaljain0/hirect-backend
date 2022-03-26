@@ -7,11 +7,17 @@ const morgan = require('morgan');
 const { AffindaCredential, AffindaAPI } = require('@affinda/affinda');
 const fs = require('fs');
 const { Axios, default: axios } = require('axios');
+const cloudinary = require('cloudinary').v2;
 
 const uri =
 	'mongodb+srv://pranjaljain0:Cu006bzbMitUTbcM@cluster0.gylbe.mongodb.net/Hirect?retryWrites=true&w=majority';
-var pdfco =
-	'pranjaljain0697@gmail.com_5c3bb5c374866adaffb3cc8992c823bb6348c52321f0b9aa03e9cd03eacb4ee2dfc79655';
+cloudinary.config({
+	cloud_name: 'daytlidrk',
+	api_key: '618964961792344',
+	api_secret: '-5vWdyTGbjo7bWnzRdXj9XG1Rws',
+	secure: true,
+});
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(morgan('dev'));
@@ -39,41 +45,46 @@ app.post('/resumeParser', async (req, res) => {
 		} else {
 			var resume = req.files.resume;
 			var email = req.body.email;
-			console.log(resume.name);
-			console.log(email);
+			var path = './uploads/' + resume.name;
+			resume.mv(path);
 
-			MongoClient.connect(uri, {
-				useNewUrlParser: true,
-				useUnifiedTopology: true,
-			})
-				.then((client) => {
-					client
-						.db('Hirect')
-						.collection('Users')
-						.updateOne({ email: email }, { $set: { resumeName: resume.name } })
-						.then((resp) =>
-							res
-								.status(200)
-								.json({ status: 1, message: 'updated succesfully', resp })
-						);
+			cloudinary.uploader.upload(
+				path,
+				{
+					public_id: `hirect/resume/${email}`,
+					overwrite: true,
+				},
+				function (error, result) {
+					if (result)
+						MongoClient.connect(uri, {
+							useNewUrlParser: true,
+							useUnifiedTopology: true,
+						})
+							.then((client) => {
+								client
+									.db('Hirect')
+									.collection('Users')
+									.updateOne(
+										{ email: email },
+										{ $set: { resume: { name: resume.name, url: result.url } } }
+									)
+									.then((resp) =>
+										res.status(200).json({
+											status: 1,
+											message: 'updated succesfully',
+											resume: { name: resume.name, url: result.url },
+										})
+									);
+								return client;
+							})
 
-					return client;
-				})
-
-				.catch((error) => {
-					res.status(500).json({ status: 'ERROR', err: error });
-					console.error(error);
-				});
-			// var bodyFormData = new FormData();
-			// bodyFormData.append('resume', resume);
-			// axios({
-			// 	method: 'post',
-			// 	url: 'https://api.pdf.co/v1/file/upload',
-			// 	headers: {
-			// 		'x-api-key': pdfco,
-			// 	},
-			// 	data: resume,
-			// });
+							.catch((error) => {
+								res.status(500).json({ status: 'ERROR', err: error });
+								console.error(error);
+							});
+					if (error) res.status(500).json({ status: 'ERROR', err: error });
+				}
+			);
 
 			// resume.mv('./uploads/' + resume.name);
 			// const credential = new AffindaCredential(
