@@ -10,7 +10,7 @@ app.use(bodyParser.json());
 app.use(morgan('dev'));
 
 const uri =
-	'mongodb+srv://pranjaljain0:Cu006bzbMitUTbcM@cluster0.gylbe.mongodb.net/Hirect?retryWrites=true&w=majority';
+	'mongodb+srv://user:Un3LcjRpxTffg4Us@cluster0.r4aou.mongodb.net/Hirect?retryWrites=true&w=majority';
 
 app.get('/', (req, res) => res.json({ Route: 'Jobs' }));
 

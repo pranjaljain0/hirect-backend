@@ -10,7 +10,7 @@ const { Axios, default: axios } = require('axios');
 const cloudinary = require('cloudinary').v2;
 
 const uri =
-	'mongodb+srv://pranjaljain0:Cu006bzbMitUTbcM@cluster0.gylbe.mongodb.net/Hirect?retryWrites=true&w=majority';
+	'mongodb+srv://user:Un3LcjRpxTffg4Us@cluster0.r4aou.mongodb.net/Hirect?retryWrites=true&w=majority';
 cloudinary.config({
 	cloud_name: 'de7jxzes9',
 	api_key: '161713749771518',
