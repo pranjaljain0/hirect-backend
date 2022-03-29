@@ -12,9 +12,9 @@ const cloudinary = require('cloudinary').v2;
 const uri =
 	'mongodb+srv://pranjaljain0:Cu006bzbMitUTbcM@cluster0.gylbe.mongodb.net/Hirect?retryWrites=true&w=majority';
 cloudinary.config({
-	cloud_name: 'daytlidrk',
-	api_key: '618964961792344',
-	api_secret: '-5vWdyTGbjo7bWnzRdXj9XG1Rws',
+	cloud_name: 'de7jxzes9',
+	api_key: '161713749771518',
+	api_secret: '78tL2uTZYLvFOQjGf7ijmSZ2ghA',
 	secure: true,
 });
 
@@ -47,6 +47,7 @@ app.post('/resumeParser', async (req, res) => {
 			var email = req.body.email;
 			var path = './uploads/' + resume.name;
 			resume.mv(path);
+			console.log(resume);
 
 			cloudinary.uploader.upload(
 				path,
@@ -86,7 +87,6 @@ app.post('/resumeParser', async (req, res) => {
 				}
 			);
 
-			// resume.mv('./uploads/' + resume.name);
 			// const credential = new AffindaCredential(
 			// 	'e01c296c8855ce16c59799532efff7c11ce9bd4d'
 			// );
