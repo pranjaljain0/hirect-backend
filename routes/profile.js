@@ -22,6 +22,66 @@ const uri =
 
 app.get('/', (req, res) => res.json({ Route: 'Profile' }));
 
+app.get('/reviews/:email', async (req, res) => {
+	var email = req.params.email;
+
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Users')
+				.findOne({ email })
+				.then((e) => {
+					console.log(e.reviews);
+					res.status(200).json({
+						status: 'SUCCESS',
+						reviews: e.reviews,
+					});
+				});
+
+			return client;
+		})
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.error(error);
+		});
+});
+
+app.post('/review/post', async (req, res) => {
+	var email = req.body.email;
+	var review = req.body.review;
+
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Users')
+				.updateOne(
+					{ email },
+					{
+						$push: {
+							reviews: review,
+						},
+					}
+				)
+				.then((e) =>
+					res.status(200).json({ status: 'SUCCESS', reviews: review })
+				);
+
+			return client;
+		})
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.error(error);
+		});
+});
+
 app.get('/votecount', async (req, res) => {
 	var email = req.query.email;
 
@@ -153,6 +213,30 @@ app.post('/add/:category/:email', async (req, res) => {
 				.updateOne({ email }, { $push: { [category]: data } })
 				.then((e) => {
 					res.status(200).json({ status: 1, message: 'UPDATED' });
+				});
+			return client;
+		})
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.error(error);
+		});
+});
+
+app.post('/remove/:category/:email', async (req, res) => {
+	var { email, category } = req.params;
+	var data = req.body.data;
+
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Users')
+				.updateOne({ email }, { $pull: { [category]: data } })
+				.then((e) => {
+					res.status(200).json({ status: 1, message: 'Removed' });
 				});
 			return client;
 		})
