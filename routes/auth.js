@@ -7,6 +7,8 @@ const mailjet = require('node-mailjet').connect(
 	'7b49938b353225cd076dcfa1512d473d',
 	'359b9eda904b7ebce328b3a1830b42a8'
 );
+var uniqid = require('uniqid');
+
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(morgan('dev'));
@@ -49,6 +51,7 @@ app.post('/JobSeekerSignUp', (req, res) => {
 	var fullName = req.body.fullName;
 	var data = {
 		accountType: 1,
+		userID: uniqid(),
 		email,
 		password,
 		fullName,
@@ -58,6 +61,7 @@ app.post('/JobSeekerSignUp', (req, res) => {
 		certifications: [],
 		savedJobs: [],
 		appliedJobs: [],
+		preferences: {},
 	};
 
 	MongoClient.connect(uri, {
@@ -102,6 +106,7 @@ app.post('/JobProviderSignUp', (req, res) => {
 	var companyName = req.body.companyName;
 	var data = {
 		accountType: 0,
+		userID: uniqid(),
 		email,
 		password,
 		fullName,

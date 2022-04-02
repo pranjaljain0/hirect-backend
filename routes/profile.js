@@ -372,4 +372,35 @@ app.post('/update', async (req, res) => {
 		});
 });
 
+app.post('/preferences/update/:email', async (req, res) => {
+	const email = req.params.email;
+	const preferences = req.body.preferences;
+	console.log({ email, preferences });
+
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Users')
+				.updateOne(
+					{ email: email },
+					{
+						$set: {
+							preferences: preferences,
+						},
+					}
+				)
+				.then((e) => res.status(200).json({ status: 1, message: 'Updated' }));
+
+			return client;
+		})
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.error(error);
+		});
+});
+
 module.exports = app;

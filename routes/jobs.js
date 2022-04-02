@@ -4,6 +4,7 @@ const express = require('express');
 const { json } = require('express/lib/response');
 const app = express.Router();
 const morgan = require('morgan');
+var uniqid = require('uniqid');
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -27,6 +28,37 @@ app.get('/all', async (req, res) => {
 				.toArray((err, results) => {
 					err && res.status(400).json(err);
 					res.status(200).json(results);
+				});
+			return client;
+		})
+		// .then((client) => client.close())
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.error(error);
+		});
+});
+
+app.get('/tags/all', async (req, res) => {
+	var tags = [];
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Jobs')
+				.find({})
+				.toArray((err, results) => {
+					err && res.status(400).json(err);
+					results.map((item, index) => {
+						item['jobTags'] !== undefined &&
+							item['jobTags'] !== null &&
+							item['jobTags'].map((item, index) => {
+								if (tags.indexOf(item) === -1) tags.push(item);
+							});
+					});
+					res.status(200).json(tags);
 				});
 			return client;
 		})
@@ -95,16 +127,23 @@ app.post('/post', async (req, res) => {
 		useUnifiedTopology: true,
 	})
 		.then((client) => {
-			client.db('Hirect').collection('Jobs').insertOne(jobDetails);
+			var jobID = uniqid();
+			client
+				.db('Hirect')
+				.collection('Jobs')
+				.insertOne({ ...jobDetails, jobID });
 
 			client
 				.db('Hirect')
 				.collection('Users')
-				.updateOne({ email }, { $addToSet: { jobPosts: jobDetails } })
+				.updateOne(
+					{ email },
+					{ $addToSet: { jobPosts: { ...jobDetails, jobID } } }
+				)
 				.then((e) => {
 					res
 						.status(200)
-						.json({ status: 'SUCCESS', res: e, email, jobDetails });
+						.json({ status: 'SUCCESS', res: e, email, jobDetails, jobID });
 				});
 			return client;
 		})
