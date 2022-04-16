@@ -5,6 +5,7 @@ var authRoutes = require('./routes/auth');
 var profileRoutes = require('./routes/profile');
 var jobsRoutes = require('./routes/jobs');
 var helperRoutes = require('./routes/helper');
+var chat = require('./routes/chat');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -20,6 +21,7 @@ app.use('/profile', profileRoutes);
 app.use('/auth', authRoutes);
 app.use('/jobs', jobsRoutes);
 app.use('/helper', helperRoutes);
+app.use('/chat', chat);
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 

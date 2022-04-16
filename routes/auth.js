@@ -7,7 +7,12 @@ const mailjet = require('node-mailjet').connect(
 	'7b49938b353225cd076dcfa1512d473d',
 	'359b9eda904b7ebce328b3a1830b42a8'
 );
+var StreamChat = require('stream-chat').StreamChat;
 var uniqid = require('uniqid');
+
+const api_key = 'try43se9tyqm';
+const api_secret =
+	'34utmrtjpx7w8j7we74ca4eynpuq4sya3rnrpe6kv8bfrzc5n4ks8aek9d3r8ejn';
 
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -45,10 +50,16 @@ app.get('/login', (req, res) => {
 		});
 });
 
-app.post('/JobSeekerSignUp', (req, res) => {
+app.post('/JobSeekerSignUp', async (req, res) => {
 	var email = req.body.email;
 	var password = req.body.password;
 	var fullName = req.body.fullName;
+	// Initialize a Server Client
+
+	const serverClient = StreamChat.getInstance(api_key, api_secret);
+	// Create User Token
+	const token = serverClient.createToken(fullName);
+
 	var data = {
 		accountType: 1,
 		userID: uniqid(),
@@ -62,6 +73,7 @@ app.post('/JobSeekerSignUp', (req, res) => {
 		savedJobs: [],
 		appliedJobs: [],
 		preferences: {},
+		chatToken: token,
 	};
 
 	MongoClient.connect(uri, {
@@ -99,11 +111,16 @@ app.post('/JobSeekerSignUp', (req, res) => {
 		});
 });
 
-app.post('/JobProviderSignUp', (req, res) => {
+app.post('/JobProviderSignUp', async (req, res) => {
 	var email = req.body.email;
 	var password = req.body.password;
 	var fullName = req.body.fullName;
 	var companyName = req.body.companyName;
+
+	const serverClient = StreamChat.getInstance(api_key, api_secret);
+	// Create User Token
+	const token = serverClient.createToken(fullName);
+
 	var data = {
 		accountType: 0,
 		userID: uniqid(),
@@ -116,6 +133,7 @@ app.post('/JobProviderSignUp', (req, res) => {
 		jobPosts: [],
 		applications: [],
 		reviews: [],
+		chatToken: token,
 	};
 
 	MongoClient.connect(uri, {

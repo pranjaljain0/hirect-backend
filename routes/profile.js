@@ -35,7 +35,6 @@ app.get('/reviews/:email', async (req, res) => {
 				.collection('Users')
 				.findOne({ email })
 				.then((e) => {
-					console.log(e.reviews);
 					res.status(200).json({
 						status: 'SUCCESS',
 						reviews: e.reviews,
@@ -73,6 +72,79 @@ app.post('/review/post', async (req, res) => {
 				.then((e) =>
 					res.status(200).json({ status: 'SUCCESS', reviews: review })
 				);
+
+			return client;
+		})
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.error(error);
+		});
+});
+
+app.get('/job/:email/:jobID', async (req, res) => {
+	var email = req.params.email;
+	var jobID = req.params.jobID;
+
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Users')
+				.findOne({ email })
+				.then((e) => {
+					e.appliedJobs.forEach((e, index) => {
+						if (e.jobID == jobID) {
+							res.status(200).json({ status: e.status });
+						}
+					});
+				});
+
+			return client;
+		})
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.error(error);
+		});
+});
+
+app.post('/application/status/update', async (req, res) => {
+	var email = req.body.email;
+	var jobID = req.body.jobID;
+	var status = req.body.status;
+	var index = null;
+
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Users')
+				.findOne({ email })
+				.then((e) => {
+					e.appliedJobs.forEach((e, index) => {
+						if (e.jobID == jobID) {
+							client
+								.db('Hirect')
+								.collection('Users')
+								.updateOne(
+									{ email },
+									{
+										$set: {
+											[`appliedJobs.${index}.status`]: status,
+										},
+									}
+								)
+								.then((e) =>
+									res.status(200).json({ status: 'SUCCESS', status: status })
+								);
+						}
+					});
+				});
 
 			return client;
 		})
@@ -282,28 +354,33 @@ app.post('/add/appliedJobs', async (req, res) => {
 				.db('Hirect')
 				.collection('Users')
 				.updateOne(
-					{ email: _jobDetail.jobPostOwnerEmail },
-					{
-						$addToSet: {
-							applications: { ..._userDetails, jobTitle: _jobDetail.jobTitle },
-						},
-					}
-				);
-
-			client
-				.db('Hirect')
-				.collection('Users')
-				.updateOne(
 					{ email: email },
 					{
 						$addToSet: {
-							appliedJobs: _jobDetail,
+							appliedJobs: { ..._jobDetail, status: '0' },
+							appliedJobsID: _jobDetail.jobID,
 						},
 					}
 				)
 				.then((e) => {
 					res.status(200).json({ status: 1, message: 'Added' });
 				});
+
+			client
+				.db('Hirect')
+				.collection('Users')
+				.updateOne(
+					{ email: _jobDetail.jobPostOwnerEmail },
+					{
+						$addToSet: {
+							applications: {
+								..._userDetails,
+								jobTitle: _jobDetail.jobTitle,
+								jobID: _jobDetail.jobID,
+							},
+						},
+					}
+				);
 
 			return client;
 		})
@@ -459,7 +536,6 @@ app.post('/update', async (req, res) => {
 app.post('/preferences/update/:email', async (req, res) => {
 	const email = req.params.email;
 	const preferences = req.body.preferences;
-	console.log({ email, preferences });
 
 	MongoClient.connect(uri, {
 		useNewUrlParser: true,

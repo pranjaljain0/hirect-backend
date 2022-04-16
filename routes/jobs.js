@@ -1,7 +1,6 @@
 const { MongoClient } = require('mongodb');
 const bodyParser = require('body-parser');
 const express = require('express');
-const { json } = require('express/lib/response');
 const app = express.Router();
 const morgan = require('morgan');
 var uniqid = require('uniqid');
@@ -32,6 +31,46 @@ app.get('/all', async (req, res) => {
 			return client;
 		})
 		// .then((client) => client.close())
+		.catch((error) => {
+			res.status(500).json({ status: 'ERROR', err: error });
+			console.error(error);
+		});
+});
+
+app.get('/sorted/:email', async (req, res) => {
+	var email = req.params.email;
+	MongoClient.connect(uri, {
+		useNewUrlParser: true,
+		useUnifiedTopology: true,
+	})
+		.then((client) => {
+			client
+				.db('Hirect')
+				.collection('Users')
+				.find({ email: email })
+				.toArray((err, results) => {
+					err && res.status(400).json(err);
+					var apps = results[0].applications;
+					var resApps = {};
+					apps.forEach((item, index) => {
+						if (
+							resApps[item.jobTitle] !== undefined &&
+							resApps[item.jobTitle].applications !== null
+						)
+							resApps[item.jobTitle] = {
+								jobID: item.jobID,
+								applications: [...resApps[item.jobTitle].applications, item],
+							};
+						else
+							resApps[item.jobTitle] = {
+								jobID: item.jobID,
+								applications: [item],
+							};
+					});
+					res.status(200).json(resApps);
+				});
+			return client;
+		})
 		.catch((error) => {
 			res.status(500).json({ status: 'ERROR', err: error });
 			console.error(error);

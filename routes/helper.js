@@ -47,7 +47,6 @@ app.post('/resumeParser', async (req, res) => {
 			var email = req.body.email;
 			var path = './uploads/' + resume.name;
 			resume.mv(path);
-			console.log(resume);
 
 			cloudinary.uploader.upload(
 				path,
